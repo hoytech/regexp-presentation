@@ -7,9 +7,6 @@ use Data::Dumper;
 my $parser = qr{
   ^ <expression> $
 
-  <token: ws>
-    (?: \s++ | [#][^\n]*\n | [/][*] .*? [*][/] )*
-
   <rule: expression>
     <term_left=term> <binary_op> <term_right=term> | <term>
 
@@ -21,9 +18,10 @@ my $parser = qr{
 
   <token: binary_op>
     [+-/*]
+
+  <token: ws>
+    (?: \s++ | [#][^\n]*\n | [/][*] .*? [*][/] )*
 }xs;
-
-
 
 
 if ($ARGV[0] =~ $parser) {

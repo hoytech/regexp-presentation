@@ -52,9 +52,9 @@
   <ul>
     <li><b>No</b>, they were first conceived in the formal framework of automata theory</li>
     <li><b>Yes</b>, perl implemented a pragmatic but informal and hacky version of them</li>
-    <li><b>No</b>, they've evolved into a different (better) form</li>
+    <li><b>No</b>, they've since evolved into a better form</li>
     <li><b>Yes</b>, you can use them inefficiently and create unreadable code</li>
-    <li><b>No</b>, this isn't a big problem because we have tools to help us</li>
+    <li><b>No</b>, this isn't a problem because we have tools to help us</li>
   </ul>
 </div>
 
@@ -64,15 +64,18 @@
 
   <ul>
     <li>Most other languages copied perl regexps as of perl 5.6-ish</li>
-    <li>Which is strange because the main criticism of perl is that it's too cryptic and regexps are one of the most cryptic parts</li>
+    <li>Which is strange because the main criticism of perl is that it's too cryptic. Regexps are (were?) one of the most cryptic parts</li>
+    <li>Most engines are PCRE-compatible, not perl-compatible</li>
     <li>Perl's engine is the most advanced in many areas: extensibility, debugging, language integration, unicode support</li>
-    <li>Most languages provide PCRE-compatible regexp engines, not perl-compatible ones</li>
   </ul>
 </div>
 
 
 <div class="slide">
-  <h1>Topics of this presentation</h1>
+  <h1>Topics</h1>
+
+  <h2>This presentation discusses the following CPAN modules:</h2>
+
   <ul>
     <li>Regexp::Debugger</li>
     <li>Regexp::Assemble</li>
@@ -86,18 +89,18 @@
 <div class="slide">
   <h1>Regexp::Debugger</h1>
   <ul>
-    <li>Module by Damian Conway</li>
     <li>Lets you debug regexps in an existing program without changing that program</li>
-    <li>Also has a stand-alone debugger <b>rxrx</b>
+    <li>Also has a stand-alone debugger <b>rxrx</b></li>
+    <li>Very nice command-line debugging interface</li>
   </ul>
 </div>
 
 
 <div class="slide">
-  <h1>Regexp::Debugger</h1>
+  <h1>Regexp::Debugger - Demo</h1>
   <ul>
     <li>What is the regexp engine actually doing?</li>
-    <li>Which parts of the regexp and input data are most expensive</li>
+    <li>Which parts of the regexp and input data are most expensive?</li>
     <li><i>Demo:</i> match <pre>/[ab]{5}bbb/</pre><br>Against <pre>'aaaaaaaaaaaaaaaaQQQQQQQQQaaaaaaaaaaaaaaaQQQQQQQQQQQQ'</pre><br> Press 'h' in the debugger to generate heat-maps</li>
   </ul>
 </div>
@@ -107,8 +110,7 @@
 <div class="slide">
   <h1>Regexp::Assemble</h1>
   <ul>
-    <li>Module by David Landgren</li>
-    <li>Combines multiple regexps into a single regexp</li>
+    <li>Assembles multiple regexps into a single regexp</li>
     <li>Builds a trie code structure into the regexp</li>
   </ul>
 </div>
@@ -116,19 +118,19 @@
 
 
 <div class="slide">
-  <h1>Regexp::Assemble</h1>
+  <h1>Regexp::Assemble - Demo</h1>
   <ul>
-    <li>Given the following sequences<pre>
+    <li>To search for the following sequences<pre>
 TTGATG  TTGGAC  TTCAAG  TTCAAC
     </pre></li>
     <li>The obvious regular expression is<pre>
-      (TTGATG|TTGGAC|TTCAAG|TTCAAC)
+(TTGATG|TTGGAC|TTCAAG|TTCAAC)
     </pre></li>
     <li>This is what Regexp::Assemble compiles<pre>
-      TT(G(ATG|GAC)|CAA[CG])
+TT(G(ATG|GAC)|CAA[CG])
     </pre></li>
-    <li><i>Demo:</i> debug the above against the following<pre>
-      TACGATCTATTTTCTATTCAGCTATCTACATTTCATCTATTTT
+    <li><i>Demo:</i> debug the above regexps against the following<pre>
+TACGATCTATTTTCTATTCAGCTATCTACATTTCATCTATTTT
     </pre></li>
   </ul>
 </div>
@@ -136,15 +138,15 @@ TTGATG  TTGGAC  TTCAAG  TTCAAC
 
 
 <div class="slide">
-  <h1>Regexp::Assemble</h1>
+  <h1>Regexp::Assemble - Implementation</h1>
   <ul>
     <li>But how do we know which sub-expression matched?</li>
     <li>One of the ways perl's engine is special is that it can run perl code during the match</li>
-    <li>Regexp::Assemble uses the <b>(?{ ... })</b> regexp directive<pre>
+    <li>Regexp::Assemble uses the <b>(?{ ... })</b> regexp directive:<pre>
 TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
     </pre></li>
-    <li>After a successful match the index of the matching sub-expression will be stored in <b>$^R</b> (or <b>$LAST_REGEXP_CODE_RESULT</b>)
-    <li>Although here we're just returning integers, as of perl 5.14 this code can run other regular expressions (the engine is re-entrant)</li>
+    <li>After a successful match the index of the matching sub-expression will be stored in <b>$^R</b> (aka <b>$LAST_REGEXP_CODE_RESULT</b>)
+    <li>Although here we're just returning integers, this could be arbitrary perl code. As of perl 5.14 this code can even run other regular expressions because the engine is re-entrant</li>
   </ul>
 </div>
 
@@ -153,12 +155,12 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 <div class="slide">
   <h1>Regexp::Grammars</h1>
   <ul>
-    <li>Module also by Damian Conway</li>
     <li>Adds recursive descent parsing to perl's regexp engine</li>
-    <li>Only affects regexps defined lexically:
+    <li>Affects regexps defined lexically:
       <pre>
         {
           use Regexp::Grammars;
+
           ## regexps here will support grammars
         }
       </pre>
@@ -167,10 +169,10 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 </div>
 
 <div class="slide">
-  <h1>Regexp::Grammars</h1>
+  <h1>Regexp::Grammars - Parse email addresses</h1>
   <ul>
     <li>You know how you should never use a regexp to match an email address? Now you can...</li>
-    <li>Abridged example from Tom Christiansen:</li>
+    <li>Abridged version of Tom Christiansen's RFC5322 parser:</li>
   </ul>
   <pre style="font-size: 80%">
     my $rfc5322 = qr{
@@ -193,9 +195,9 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 
 <div class="slide">
-  <h1>Regexp::Grammars</h1>
+  <h1>Regexp::Grammars - Demo</h1>
   <ul>
-    <li>The example of nested parentheses is the classic example of something you shouldn't do with a regexp</li>
+    <li>Nested parentheses are the classic example of something you can't do with a regexp</li>
     <li><i>Demo:</i> <b>arith2lisp.pl</b> is a program that parses infix arithmetic expressions and converts them into lisp-style prefix expressions</li>
   <ul>
 </div>
@@ -205,16 +207,16 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 <div class="slide">
   <h1>Regexp::Exhaustive</h1>
   <ul>
-    <li>When you want to find all the occurrences of a regular expression in a string you can use <b>m//g</b> in perl ("findall"):
+    <li>When you want to find all the occurrences of a regular expression in a string you can use <b>m//g</b> in perl ("findall" in python/javascript):
   <pre>
     @matches = "AAAA" =~ m/AA/g;
   </pre></li>
-    <li>These are all the matches assuming there are no overlaps: <pre>
+    <li>These are the matches it returns: <pre>
     AAAA
     --
       --
     </pre></li>
-    <li>What if you <b>want</b> all possible matches? <pre>
+    <li>But what if you want all the possible matches? <pre>
     AAAA
     --
      --
@@ -224,13 +226,13 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 </div>
 
 <div class="slide">
-  <h1>Regexp::Exhaustive</h1>
+  <h1>Regexp::Exhaustive - Implementation</h1>
   <ul>
-    <li>Regexp::Exhaustive does this by inserting code that records a successful match and then artificially failing the match to invoke back-tracking</li>
+    <li>Regexp::Exhaustive does this by inserting code that records a successful match and then artificially failing the match in order to invoke back-tracking</li>
     <li>The <b>m/AA/g</b> regexp would be transformed into: <pre>
     AA(?{ record_match(); })(*FAIL)
     <pre></li>
-    <li>Example from Regexp::Exhaustive docs. Get all sub-strings: <pre>
+    <li>Here is how to get all sub-strings from a string: <pre>
       say for exhaustive('abc' => qr/.+/);
       # abc
       # ab
@@ -246,7 +248,6 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 <div class="slide">
   <h1>Bio::Regexp</h1>
   <ul>
-    <li>Module by me (Doug Hoyte)</li>
     <li>Specialised regexp language for biological data like DNA, RNA, and protein sequences</li>
     <li>Exhaustive search, even for double-stranded and circular molecules</li>
   </ul>
@@ -256,7 +257,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 
 <div class="slide">
-  <h1>Bio::Regexp</h1>
+  <h1>Bio::Regexp - Single pass scans</h1>
   <ul>
     <li>Because DNA is a double-helix and one strand corresponds to the other strand letter-by-letter, we also need to scan the <b>reverse complement</b> strand</li>
     <li>Bio::Regexp can scan for your pattern(s) on the main strand and the reverse complement strand in a single pass so you don't have to copy and reverse the strand (also improves memory locality)</li>
@@ -267,7 +268,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 
 <div class="slide">
-  <h1>Bio::Regexp</h1>
+  <h1>Bio::Regexp - Circular inputs</h1>
   <ul>
     <li>Normally no input data is copied at all except for circular molecules</li>
     <li>With circular molecules, we only need to copy this amount to see if any matches span the arbitrary location chosen to be the "start"/"end"</li>
@@ -278,7 +279,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 
 <div class="slide">
-  <h1>Bio::Regexp</h1>
+  <h1>Bio::Regexp - IUPAC codes</h1>
   <ul>
     <li>Supports IUPAC abbreviations, which are the same idea as regexp character classes</li>
     <li>Regexp character class: <b>\w</b> is short for <b>[a-zA-Z0-9_]</b></li>
@@ -292,10 +293,10 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 <div class="slide">
   <h1>Limitations of perl's engine</h1>
   <ul>
-    <li>Although back-tracking can be very useful (as we've seen), certain patterns can take exponentially long. You shouldn't process untrusted patterns because someone malicious could peg your CPU indefinitely</li>
-    <li>Some engines limit the language slightly to prevent back-tracking and can process malicious patterns quickly. For example, re::engine::RE2</li>
-    <li>AFAIK, perl's engine can't export its internal state so that data can be processed in blocks immediately as it arrives</li>
-    <li>Ragel and sregex are examples of state machine parsers that can do this</li>
+    <li>Although back-tracking can be very useful (as we've seen), certain patterns can take an exponentially long time to match/fail. You shouldn't use backtracking engines to process untrusted patterns otherwise malicious sequences could peg your CPU indefinitely</li>
+    <li>Some engines limit the language to prevent back-tracking and can process all patterns in linear time by compiling them to DFAs. For example, <b>re::engine::RE2</b></li>
+    <li>Perl's engine can't export and re-import its internal state so that data can be iteratively processed in blocks as it arrives</li>
+    <li><b>Ragel</b> and <b>sregex</b> are examples of state machine parsers that can do this</li>
   <ul>
 </div>
 

@@ -13,7 +13,7 @@
    height="768px"
    id="svg3854"
    version="1.1"
-   inkscape:version="0.48.2 r9819"
+   inkscape:version="0.48.1 r9760"
    sodipodi:docname="frames.svg">
   <sodipodi:namedview
      id="base"
@@ -23,13 +23,13 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.76464844"
-     inkscape:cx="587.04745"
-     inkscape:cy="384"
+     inkscape:cx="453.87063"
+     inkscape:cy="535.3457"
      inkscape:current-layer="layer1"
      inkscape:document-units="px"
      showgrid="false"
-     inkscape:window-width="1280"
-     inkscape:window-height="949"
+     inkscape:window-width="1024"
+     inkscape:window-height="549"
      inkscape:window-x="0"
      inkscape:window-y="25"
      inkscape:window-maximized="1" />
@@ -197,25 +197,25 @@
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="54.070724"
-       y="286.36502"
+       x="85.534325"
+       y="288.28839"
        id="text3814-8"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3816-1"
-         x="54.070724"
-         y="286.36502">AUG</tspan></text>
+         x="85.534325"
+         y="288.28839">ATG</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="168.07077"
+       x="186.37984"
        y="288.36505"
        id="text3818-7"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3820-7"
-         x="168.07077"
-         y="288.36505">UAU</tspan></text>
+         x="186.37984"
+         y="288.36505">TAT</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -248,7 +248,7 @@
          sodipodi:role="line"
          id="tspan3832-9"
          x="494.07077"
-         y="288.36505">UAG</tspan></text>
+         y="288.36505">TAG</tspan></text>
     <path
        style="fill:#00ff00;stroke:#00ff00;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-end:url(#Arrow2LendE)"
        d="m 557.77011,356.44274 -89.80256,0"
@@ -279,36 +279,36 @@
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="54.777817"
-       y="325.18097"
+       x="86.241417"
+       y="327.10434"
        id="text3814-8-6"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3816-1-0"
-         x="54.777817"
-         y="325.18097">UAC</tspan></text>
+         x="86.241417"
+         y="327.10434">TAC</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="168.77789"
+       x="187.08696"
        y="327.181"
        id="text3818-7-4"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3820-7-9"
-         x="168.77789"
-         y="327.181">TUT</tspan></text>
+         x="187.08696"
+         y="327.181">ATA</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="279.77786"
+       x="281.77786"
        y="327.181"
        id="text3822-9-5"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3824-7-3"
-         x="279.77786"
-         y="327.181">CUC</tspan></text>
+         x="281.77786"
+         y="327.181">CTC</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -330,7 +330,7 @@
          sodipodi:role="line"
          id="tspan3832-9-7"
          x="494.77786"
-         y="327.181">AUC</tspan></text>
+         y="327.181">ATC</tspan></text>
     <path
        sodipodi:type="arc"
        style="fill:#000000;fill-opacity:0;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
