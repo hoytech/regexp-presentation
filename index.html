@@ -39,7 +39,7 @@
 
 <div class="slide">
   <center>
-  <h1 style="font-size: 350%">Getting the most out of regular expressions</h1>
+  <h1 style="font-size: 300%">Getting the most out of regular expressions</h1>
   <br>
   <h2>Doug Hoyte</h2>
   </center>
@@ -66,7 +66,7 @@
     <li>Most other languages copied perl regexps as of perl 5.6-ish</li>
     <li>Which is strange because the main criticism of perl is that it's too cryptic. Regexps are (were?) one of the most cryptic parts</li>
     <li>Most engines are PCRE-compatible, not perl-compatible</li>
-    <li>Perl's engine is the most advanced in many areas: extensibility, debugging, language integration, unicode support</li>
+    <li>Perl's engine is the most advanced in many areas: extensibility, debugging, profiling, language integration, unicode support</li>
   </ul>
 </div>
 
@@ -74,7 +74,7 @@
 <div class="slide">
   <h1>Topics</h1>
 
-  <h2>This presentation discusses the following CPAN modules:</h2>
+  <h2>This presentation discusses the following modules:</h2>
 
   <ul>
     <li>Regexp::Debugger</li>
@@ -171,7 +171,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 <div class="slide">
   <h1>Regexp::Grammars - Parse email addresses</h1>
   <ul>
-    <li>You know how you should never use a regexp to match an email address? Now you can...</li>
+    <li>You know how you should never use a regexp to match an email address? Well now you can...</li>
     <li>Abridged version of Tom Christiansen's RFC5322 parser:</li>
   </ul>
   <pre style="font-size: 80%">
@@ -284,7 +284,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
     <li>Supports IUPAC abbreviations, which are the same idea as regexp character classes</li>
     <li>Regexp character class: <b>\w</b> is short for <b>[a-zA-Z0-9_]</b></li>
     <li>IUPAC abbreviation: <b>Y</b> is short for <b>[CT]</b></li>
-    <li>If you buy PCR primers and specify <b>Y</b> in the sequence, half of the molecules will have a <b>C</b> and half will have a <b>T</b> in that position</li>
+    <li>If you buy PCR primers and specify <b>Y</b> in the sequence, for that position 50% of the molecules will bind to a <b>C</b> and 50% to <b>T</b></li>
   </ul>
 </div>
 
@@ -304,13 +304,20 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 <div class="slide">
   <h1>Questions?</h1>
+  <h2>This presentation:</h2>
+  <ul>
+    <li><a href="http://hoytech.github.io/regexp-presentation/">http://hoytech.github.io/regexp-presentation/</a></li>
+  </ul>
+
+  <br>
+
   <h2>Learn more on CPAN:</h2>
   <ul>
-    <li>Regexp::Debugger</li>
-    <li>Regexp::Assemble</li>
-    <li>Regexp::Grammars</li>
-    <li>Regexp::Exhaustive</li>
-    <li>Bio::Regexp</li>
+    <li><a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Debugger</a></li>
+    <li><a href="https://metacpan.org/module/Regexp::Assemble">Regexp::Assemble</a></li>
+    <li><a href="https://metacpan.org/module/Regexp::Grammars">Regexp::Grammars</a></li>
+    <li><a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Exhaustive</a></li>
+    <li><a href="http://github.com/hoytech/Bio-Regexp/">Bio::Regexp</a> (CPAN soon, on my github now)</li>
   </ul>
 </div>
 
