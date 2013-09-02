@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Getting the most out of regular expressions</title>
+<!-- metadata -->
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta name="generator" content="S5" />
+<meta name="version" content="S5 1.1" />
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<link rel="stylesheet" href="ui/default/slides.css" type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css" type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css" type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css" type="text/css" media="projection" id="operaFix" />
+<!-- S5 JS -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+
+
+</head>
+<body>
+
+<div class="layout">
+<div id="controls"><!-- DO NOT EDIT --></div>
+<div id="currentSlide"><!-- DO NOT EDIT --></div>
+<div id="header"></div>
+<div id="footer">
+<h1>Getting the most out of regular expressions</h1>
+</div>
+
+</div>
+
+
+<div class="presentation">
+
+<div class="slide">
+  <center>
+  <h1 style="font-size: 350%">Getting the most out of regular expressions</h1>
+  <br>
+  <h2>Doug Hoyte</h2>
+  </center>
+</div>
+
+
+<div class="slide">
+  <h1>Are Regexps a hack?</h1>
+
+  <ul>
+    <li><b>No</b>, they were first conceived in the formal framework of automata theory</li>
+    <li><b>Yes</b>, perl implemented a pragmatic but informal and hacky version of them</li>
+    <li><b>No</b>, they've evolved into a different (better) form</li>
+    <li><b>Yes</b>, you can use them inefficiently and create unreadable code</li>
+    <li><b>No</b>, this isn't a big problem because we have tools to help us</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>All languages have regexps right?</h1>
+
+  <ul>
+    <li>Most other languages copied perl regexps as of perl 5.6-ish</li>
+    <li>Which is strange because the main criticism of perl is that it's too cryptic and regexps are one of the most cryptic parts</li>
+    <li>Perl's engine is the most advanced in many areas: extensibility, debugging, language integration, unicode support</li>
+    <li>Most languages provide PCRE-compatible regexp engines, not perl-compatible ones</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Topics of this presentation</h1>
+  <ul>
+    <li>Regexp::Debugger</li>
+    <li>Regexp::Assemble</li>
+    <li>Regexp::Grammars</li>
+    <li>Regexp::Exhaustive</li>
+    <li>Bio::Regexp</li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Regexp::Debugger</h1>
+  <ul>
+    <li>Module by Damian Conway</li>
+    <li>Lets you debug regexps in an existing program without changing that program</li>
+    <li>Also has a stand-alone debugger <b>rxrx</b>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Regexp::Debugger</h1>
+  <ul>
+    <li>What is the regexp engine actually doing?</li>
+    <li>Which parts of the regexp and input data are most expensive</li>
+    <li><i>Demo:</i> match <pre>/[ab]{5}bbb/</pre><br>Against <pre>'aaaaaaaaaaaaaaaaQQQQQQQQQaaaaaaaaaaaaaaaQQQQQQQQQQQQ'</pre><br> Press 'h' in the debugger to generate heat-maps</li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Regexp::Assemble</h1>
+  <ul>
+    <li>Module by David Landgren</li>
+    <li>Combines multiple regexps into a single regexp</li>
+    <li>Builds a trie code structure into the regexp</li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Regexp::Assemble</h1>
+  <ul>
+    <li>Given the following sequences<pre>
+TTGATG  TTGGAC  TTCAAG  TTCAAC
+    </pre></li>
+    <li>The obvious regular expression is<pre>
+      (TTGATG|TTGGAC|TTCAAG|TTCAAC)
+    </pre></li>
+    <li>This is what Regexp::Assemble compiles<pre>
+      TT(G(ATG|GAC)|CAA[CG])
+    </pre></li>
+    <li><i>Demo:</i> debug the above against the following<pre>
+      TACGATCTATTTTCTATTCAGCTATCTACATTTCATCTATTTT
+    </pre></li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Regexp::Assemble</h1>
+  <ul>
+    <li>But how do we know which sub-expression matched?</li>
+    <li>One of the ways perl's engine is special is that it can run perl code during the match</li>
+    <li>Regexp::Assemble uses the <b>(?{ ... })</b> regexp directive<pre>
+TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
+    </pre></li>
+    <li>After a successful match the index of the matching sub-expression will be stored in <b>$^R</b> (or <b>$LAST_REGEXP_CODE_RESULT</b>)
+    <li>Although here we're just returning integers, as of perl 5.14 this code can run other regular expressions (the engine is re-entrant)</li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Regexp::Grammars</h1>
+  <ul>
+    <li>Module also by Damian Conway</li>
+    <li>Adds recursive descent parsing to perl's regexp engine</li>
+    <li>Only affects regexps defined lexically:
+      <pre>
+        {
+          use Regexp::Grammars;
+          ## regexps here will support grammars
+        }
+      </pre>
+    </li>
+  </ul>
+</div>
+
+<div class="slide">
+  <h1>Regexp::Grammars</h1>
+  <ul>
+    <li>You know how you should never use a regexp to match an email address? Now you can...</li>
+    <li>Abridged example from Tom Christiansen:</li>
+  </ul>
+  <pre style="font-size: 80%">
+    my $rfc5322 = qr{
+      # Match this...
+      &lt;address&gt
+
+      # As defined by these...
+      &lt;token: address&gt         &lt;mailbox> | &lt;group>
+      &lt;token: mailbox&gt         &lt;name_addr> | &lt;addr_spec>
+      &lt;token: name_addr&gt       &lt;display_name>? &lt;angle_addr>
+      &lt;token: angle_addr&gt      &lt;CFWS>? \&lt; &lt;addr_spec> \> &lt;CFWS>?
+      &lt;token: display_name&gt    &lt;phrase>
+      &lt;token: mailbox_list&gt    &lt;[mailbox]> ** (,)
+      &lt;token: addr_spec&gt       &lt;local_part> \@ &lt;domain>
+      ...
+    };
+  </pre>
+</div>
+
+
+
+<div class="slide">
+  <h1>Regexp::Grammars</h1>
+  <ul>
+    <li>The example of nested parentheses is the classic example of something you shouldn't do with a regexp</li>
+    <li><i>Demo:</i> <b>arith2lisp.pl</b> is a program that parses infix arithmetic expressions and converts them into lisp-style prefix expressions</li>
+  <ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Regexp::Exhaustive</h1>
+  <ul>
+    <li>When you want to find all the occurrences of a regular expression in a string you can use <b>m//g</b> in perl ("findall"):
+  <pre>
+    @matches = "AAAA" =~ m/AA/g;
+  </pre></li>
+    <li>These are all the matches assuming there are no overlaps: <pre>
+    AAAA
+    --
+      --
+    </pre></li>
+    <li>What if you <b>want</b> all possible matches? <pre>
+    AAAA
+    --
+     --
+      --
+    </pre></li>
+  <ul>
+</div>
+
+<div class="slide">
+  <h1>Regexp::Exhaustive</h1>
+  <ul>
+    <li>Regexp::Exhaustive does this by inserting code that records a successful match and then artificially failing the match to invoke back-tracking</li>
+    <li>The <b>m/AA/g</b> regexp would be transformed into: <pre>
+    AA(?{ record_match(); })(*FAIL)
+    <pre></li>
+    <li>Example from Regexp::Exhaustive docs. Get all sub-strings: <pre>
+      say for exhaustive('abc' => qr/.+/);
+      # abc
+      # ab
+      # a
+      # bc
+      # b
+      # c
+    </pre></li>
+  </ul>
+</div>
+
+
+<div class="slide">
+  <h1>Bio::Regexp</h1>
+  <ul>
+    <li>Module by me (Doug Hoyte)</li>
+    <li>Specialised regexp language for biological data like DNA, RNA, and protein sequences</li>
+    <li>Exhaustive search, even for double-stranded and circular molecules</li>
+  </ul>
+  <center><img height="75%" width="75%" src="img/frames.svg"></center>
+</div>
+
+
+
+<div class="slide">
+  <h1>Bio::Regexp</h1>
+  <ul>
+    <li>Because DNA is a double-helix and one strand corresponds to the other strand letter-by-letter, we also need to scan the <b>reverse complement</b> strand</li>
+    <li>Bio::Regexp can scan for your pattern(s) on the main strand and the reverse complement strand in a single pass so you don't have to copy and reverse the strand (also improves memory locality)</li>
+  </ul>
+  <center><img height="90%" width="90%" src="img/revcomp-search.svg"></center>
+</div>
+
+
+
+<div class="slide">
+  <h1>Bio::Regexp</h1>
+  <ul>
+    <li>Normally no input data is copied at all except for circular molecules</li>
+    <li>With circular molecules, we only need to copy this amount to see if any matches span the arbitrary location chosen to be the "start"/"end"</li>
+  </ul>
+  <img height="90%" width="90%" src="img/circular-copying.svg">
+</div>
+
+
+
+<div class="slide">
+  <h1>Bio::Regexp</h1>
+  <ul>
+    <li>Supports IUPAC abbreviations, which are the same idea as regexp character classes</li>
+    <li>Regexp character class: <b>\w</b> is short for <b>[a-zA-Z0-9_]</b></li>
+    <li>IUPAC abbreviation: <b>Y</b> is short for <b>[CT]</b></li>
+    <li>If you buy PCR primers and specify <b>Y</b> in the sequence, half of the molecules will have a <b>C</b> and half will have a <b>T</b> in that position</li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Limitations of perl's engine</h1>
+  <ul>
+    <li>Although back-tracking can be very useful (as we've seen), certain patterns can take exponentially long. You shouldn't process untrusted patterns because someone malicious could peg your CPU indefinitely</li>
+    <li>Some engines limit the language slightly to prevent back-tracking and can process malicious patterns quickly. For example, re::engine::RE2</li>
+    <li>AFAIK, perl's engine can't export its internal state so that data can be processed in blocks immediately as it arrives</li>
+    <li>Ragel and sregex are examples of state machine parsers that can do this</li>
+  <ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Questions?</h1>
+  <h2>Learn more on CPAN:</h2>
+  <ul>
+    <li>Regexp::Debugger</li>
+    <li>Regexp::Assemble</li>
+    <li>Regexp::Grammars</li>
+    <li>Regexp::Exhaustive</li>
+    <li>Bio::Regexp</li>
+  </ul>
+</div>
+
+
+</div>
+</body>
+</html>
