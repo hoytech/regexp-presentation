@@ -1,0 +1,13 @@
+=encoding utf-8
+
+=head1 NAME
+
+regexp-presentation - Getting the most out of regular expressions
+
+=head1 VIEW
+
+http://hoytech.github.io/regexp-presentation
+
+=head1 SOURCE
+
+https://github.com/hoytech/regexp-presentation/tree/gh-pages
