@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-<title>Getting the most out of regular expressions</title>
+<title>Re-Enter Regular Expressions</title>
 <!-- metadata -->
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <meta name="generator" content="S5" />
@@ -29,7 +29,7 @@
 <div id="currentSlide"><!-- DO NOT EDIT --></div>
 <div id="header"></div>
 <div id="footer">
-<h1>Getting the most out of regular expressions</h1>
+<h1>Re-Enter Regular Expressions</h1>
 </div>
 
 </div>
@@ -39,27 +39,18 @@
 
 <div class="slide">
   <center>
-  <h1 style="font-size: 300%">Getting the most out of regular expressions</h1>
+  <h1 style="font-size: 300%">Re-Enter Regular Expressions</h1>
   <br>
   <h2>Doug Hoyte</h2>
   </center>
 </div>
 
 
+
 <div class="slide">
   <h1>Regexp::Debugger</h1>
   <ul>
-    <li>Lets you debug regexps in an existing program without changing that program</li>
-    <li>Also has a stand-alone debugger <b>rxrx</b></li>
-    <li>Very nice command-line debugging interface</li>
-  </ul>
-</div>
-
-
-<div class="slide">
-  <h1>Regexp::Debugger - Demo</h1>
-  <ul>
-    <li>What is the regexp engine actually doing?</li>
+    <li>What is the regexp engine actually doing? Use <b>rxrx</b></li>
     <li>Which parts of the regexp and input data are most expensive?</li>
     <li><i>Demo:</i> match <pre>/[ab]{5}bbb/</pre><br>Against <pre>'aaaaaaaaaaaaaaaaQQQQQQQQQaaaaaaaaaaaaaaaQQQQQQQQQQQQ'</pre><br> Press 'h' in the debugger to generate heat-maps</li>
   </ul>
@@ -68,18 +59,10 @@
 
 
 <div class="slide">
-  <h1>Regexp::Assemble</h1>
-  <ul>
-    <li>Assembles multiple regexps into a single regexp</li>
-    <li>Builds a trie code structure into the regexp</li>
-  </ul>
-</div>
-
-
-
-<div class="slide">
   <h1>Regexp::Assemble - Demo</h1>
   <ul>
+    <li>Assembles multiple regexps into a single regexp as a trie data-structure</li>
+
     <li>To search for the following sequences<pre>
 TTGATG  TTGGAC  TTCAAG  TTCAAC
     </pre></li>
@@ -89,9 +72,7 @@ TTGATG  TTGGAC  TTCAAG  TTCAAC
     <li>This is what Regexp::Assemble compiles<pre>
 TT(G(ATG|GAC)|CAA[CG])
     </pre></li>
-    <li><i>Demo:</i> debug the above regexps against the following<pre>
-TACGATCTATTTTCTATTCAGCTATCTACATTTCATCTATTTT
-    </pre></li>
+    <li><i>Demo</i></i>
   </ul>
 </div>
 
@@ -321,12 +302,6 @@ unidecode("До свидания")
   => Do svidaniia
 </pre>
 
-Chinese: Shanghai (the city)
-<pre style="margin-left: 100px">
-unidecode("上海")
-  => Shang Hai
-</pre>
-
 Arabic: Good morning ("Sabah el kheer")
 <pre style="margin-left: 100px">
 unidecode("صباح الخير")
@@ -338,14 +313,43 @@ Thai: Tom Yum (the soup)
 unidecode("ต้มยำ")
   => tmyam
 </pre>
+
+<br>
+With PerlIO::via::Unidecode can do <pre>open(my $fh, "<:encoding(utf8):via(Unidecode)", $file)</pre>
 </div>
 
 
+<div class="slide">
+  <h1>Annotate_unidecode</h1>
+
+<pre style="font-size: 80%">
+sub annotate_unidecode {
+  my $val = shift;
+
+  $val =~ s{ ( \P{ASCII} \P{Latin}* ) }
+           {
+             my $match = $1;
+             "$match (" . unidecode($match) . ")"
+           }egx;
+
+  return $val;
+}
+</pre>
+
+<br>
+Quite useful for reading sparse mixed-script documents:
+
+<pre style="font-size: 90%">
+annotate_unidecode("Hello I am 许勤 from 深圳")'
+  => Hello I am 许勤 (Xu Qin) from 深圳 (Shen Zhen)
+</pre>
+
+</div>
 
 <div class="slide">
   <h1>Bi-Directional Writing</h1>
   <ul>
-    <li>Perl's regexp engine (with Text::Bidi and Text::WrapI18N) supports bi-directional text as per unicode TR9</li>
+    <li>Perl has good bi-directional language support (such as Text::Bidi and Text::WrapI18N)</li>
     <li>In pre-hellenistic greek, it was common to write in alternating directions: Boustrophedon ("as the ox turns")</li>
   </ul>
 
@@ -359,7 +363,8 @@ unidecode("ต้มยำ")
 <div class="slide">
   <h1>Text::Boustrophedon</h1>
 
-Most useless module ever 😁
+Most useless module ever, of course done with crazy regexp hacks<br>
+  😁 😁 😁
 
 <br><br>
 
@@ -382,6 +387,56 @@ or other shall fall and glut grim Ares with his life's
 
 
 
+
+<div class="slide">
+  <h1>The C curse</h1>
+
+  <ul>
+    <li>Historically perl strings have always tried to terminate strings with nul bytes like C</li>
+    <li>However, perl also lets you store nul bytes in your strings so length is stored separately</li>
+    <li>Interacting with unix things like path-names is more efficient if the string is known to be nul-terminated and to not contain nul-bytes</li>
+    <li>Before perl 5.18, the regexp engine would sometimes read in the extra, optional nul byte which is normally OK except...</li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Virtual memory page permissions</h1>
+
+  <ul>
+    <li>It is common to use perl strings to point to memory not managed by perl, for example with memory mapped files</li>
+    <li>However the OS can map the file anywhere in memory and the adjacent pages aren't guaranteed to be readable</li>
+    <li>If the file mapped is an exact multiple of VM page size, and your OS has chosen a random address for the mapping, and you run certain regexps against the string, then &#128163; segfault &#128163;</li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
+  <h1>Gap pages</h1>
+  <ul>
+    <li>To demonstrate this, nothing special is needed on OpenBSD: mappings are random and separated by gap pages</li>
+    <li>If your OS allocates them in decreasing, adjacent addresses (ie linux without PaX patches), you can create a gap page yourself:</li>
+  </ul>
+
+<br>
+
+  <pre>
+use File::Map qw/map_file protect PROT_NONE/;
+
+map_file(my $gap_page, "/dev/zero", "<", 0, 4096);
+protect($gap_page, PROT_NONE);
+
+map_file(my $string, "/dev/zero", "<", 0, 4096);
+
+$string =~ /.$/; ## boom
+  </pre>
+</div>
+
+
+
+
 <div class="slide">
   <h1>Re-Entrant Regexp Engine</h1>
 
@@ -397,9 +452,12 @@ $ perl -e '"X" =~ m{(??{ "X" =~ m{} })}'
 Segmentation fault
 </pre>
     </li>
-    <li>Running code from inside the regexp engine is useful (done in Regexp::Assemble and Regexp::Exhaustive) &mdash; even more useful when the code can be unrestricted perl that includes regexps</li>
+    <li>As we've seen, running code from inside the regexp engine is quite useful: Regexp::Grammars, Regexp::Assemble, Regexp::Exhaustive, our annotate_unidecode sub</li>
+    <li>Real perl code needs to use regexps</li>
   </ul>
 </div>
+
+
 
 
 
@@ -410,23 +468,28 @@ Segmentation fault
     <li><a href="http://hoytech.github.io/regexp-presentation/">http://hoytech.github.io/regexp-presentation/</a></li>
   </ul>
 
-  <br>
-
-  <h2>Modules:</h2>
-  <br>
+  <br><br>
 
   <center>
-  <a href="https://metacpan.org/module/Regexp::Debugger">Regexp::Debugger</a> &mdash;
-  <a href="https://metacpan.org/module/Regexp::Assemble">Regexp::Assemble</a> &mdash;
+  <a href="https://metacpan.org/module/Regexp::Debugger">Regexp::Debugger</a>
+ &mdash;
   <a href="https://metacpan.org/module/Regexp::Grammars">Regexp::Grammars</a>
   <br>
-  <a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Exhaustive</a> &mdash;
-  <a href="http://github.com/hoytech/Bio-Regexp/">Bio::Regexp</a> &mdash;
-  <a href="https://metacpan.org/module/Text::Unidecode">Text::Unidecode</a>
+  <a href="https://metacpan.org/module/Regexp::Assemble">Regexp::Assemble</a>
+ &mdash;
+  <a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Exhaustive</a>
   <br>
-  <a href="https://metacpan.org/module/Text::Boustrophedon">Text::Boustrophedon</a> &mdash;
-  <a href="https://metacpan.org/module/Text::WrapI18N">Text::Bidi</a> &mdash;
+  <a href="http://github.com/hoytech/Bio-Regexp/">Bio::Regexp</a>
+ &mdash;
+  <a href="https://metacpan.org/module/Text::Boustrophedon">Text::Boustrophedon</a>
+  <br>
+  <a href="https://metacpan.org/module/Text::Bidi">Text::Bidi</a>
+ &mdash;
   <a href="https://metacpan.org/module/Text::WrapI18N">Text::WrapI18N</a>
+  <br>
+  <a href="https://metacpan.org/module/Text::Unidecode">Text::Unidecode</a>
+ &mdash;
+  <a href="https://metacpan.org/module/PerlIO::via::Unidecode">PerlIO::via::Unidecode</a>
   </center>
 </div>
 

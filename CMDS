@@ -1,0 +1,15 @@
+perl -MText::Unidecode -E 'use utf8; say unidecode("Θησέας")'
+
+
+perl -CAS -E 'use utf8; use Text::WrapI18N qw(wrap $columns); $columns = 10; say wrap("","","stuff");'
+
+
+perl -CAS -MText::Bidi -E 'use utf8; say "-----------\n".Text::Bidi::log2vis(q{asdf asdf})'
+
+
+perl -CAS -Mblib -MText::Boustrophedon -E '$Text::Boustrophedon::columns = 55; undef $/; say Text::Boustrophedon::greek(<>)' t/input.txt
+
+
+perl -MPerlIO::via::Unidecode -E 'open($fh, "<:encoding(utf8):via(Unidecode)", "inp") || die $!; print <$fh>'
+
+perl -CAS -MAnnotate -E 'use utf8; say Annotate::annotate_unidecode("Hello I am 许勤 from 深 圳")'
