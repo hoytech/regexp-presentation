@@ -1,0 +1,13 @@
+/[ab]{5}bbb/
+'aaaaaaaaaaaaaaaaQQQQQQQQQaaaaaaaaaaaaaaaQQQQQQQQQQQQ'
+
+
+
+/(TTGATG|TTGGAC|TTCAAG|TTCAAC)/
+/TT(G(ATG|GAC)|CAA[CG])/
+'TACGATCTATTTTCTATTCAGCTATCTACATTTCATCTATTTT'
+
+
+
+in perl 5.8.9
+perl -e '"X" =~ m{(??{ "X" =~ m{} })}'

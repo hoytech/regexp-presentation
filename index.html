@@ -47,46 +47,6 @@
 
 
 <div class="slide">
-  <h1>Are Regexps a hack?</h1>
-
-  <ul>
-    <li><b>No</b>, they were first conceived in the formal framework of automata theory</li>
-    <li><b>Yes</b>, perl implemented a pragmatic but informal and hacky version of them</li>
-    <li><b>No</b>, they've since evolved into a better form</li>
-    <li><b>Yes</b>, you can use them inefficiently and create unreadable code</li>
-    <li><b>No</b>, this isn't a problem because we have tools to help us</li>
-  </ul>
-</div>
-
-
-<div class="slide">
-  <h1>All languages have regexps right?</h1>
-
-  <ul>
-    <li>Most other languages copied perl regexps as of perl 5.6-ish</li>
-    <li>Which is strange because the main criticism of perl is that it's too cryptic. Regexps are (were?) one of the most cryptic parts</li>
-    <li>Most engines are PCRE-compatible, not perl-compatible</li>
-    <li>Perl's engine is the most advanced in many areas: extensibility, debugging, profiling, language integration, unicode support</li>
-  </ul>
-</div>
-
-
-<div class="slide">
-  <h1>Topics</h1>
-
-  <h2>This presentation discusses the following modules:</h2>
-
-  <ul>
-    <li>Regexp::Debugger</li>
-    <li>Regexp::Assemble</li>
-    <li>Regexp::Grammars</li>
-    <li>Regexp::Exhaustive</li>
-    <li>Bio::Regexp</li>
-  </ul>
-</div>
-
-
-<div class="slide">
   <h1>Regexp::Debugger</h1>
   <ul>
     <li>Lets you debug regexps in an existing program without changing that program</li>
@@ -146,7 +106,7 @@ TACGATCTATTTTCTATTCAGCTATCTACATTTCATCTATTTT
 TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
     </pre></li>
     <li>After a successful match the index of the matching sub-expression will be stored in <b>$^R</b> (aka <b>$LAST_REGEXP_CODE_RESULT</b>)
-    <li>Although here we're just returning integers, this could be arbitrary perl code. As of perl 5.14 this code can even run other regular expressions because the engine is re-entrant</li>
+    <li>Although here we're just returning integers, this could be arbitrary perl code</li>
   </ul>
 </div>
 
@@ -174,7 +134,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
     <li>You know how you should never use a regexp to match an email address? Well now you can...</li>
     <li>Abridged version of Tom Christiansen's RFC5322 parser:</li>
   </ul>
-  <pre style="font-size: 80%">
+  <pre style="font-size: 75%">
     my $rfc5322 = qr{
       # Match this...
       &lt;address&gt
@@ -246,6 +206,34 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 
 <div class="slide">
+  <h1>Regexp::Exhaustive - Factorisation</h1>
+
+  <ul>
+    <li>Crazy method to determine if an integer is prime invented by ABIGAIL:<br><br>
+<pre>
+sub is_prime {
+
+  !( (1 x shift) =~ /^(..+)\1+$/ )
+
+}
+</pre>
+    </li>
+    <li>With Regexp::Exhaustive you can find all divisors:<br><br>
+<pre>
+sub divisors {
+
+  map length, exhaustive((1 x shift) =>
+                         qr/^(.+?)\1*$/)
+
+}
+</pre>
+    </li>
+  </ul>
+</div>
+
+
+
+<div class="slide">
   <h1>Bio::Regexp</h1>
   <ul>
     <li>Specialised regexp language for biological data like DNA, RNA, and protein sequences</li>
@@ -253,6 +241,19 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
   </ul>
   <center><img height="75%" width="75%" src="img/frames.svg"></center>
 </div>
+
+
+
+<div class="slide">
+  <h1>Bio::Regexp - IUPAC codes</h1>
+  <ul>
+    <li>Supports IUPAC abbreviations, which are the same idea as regexp character classes</li>
+    <li>Regexp character class: <b>\w</b> is short for <b>[a-zA-Z0-9_]</b></li>
+    <li>IUPAC abbreviation: <b>Y</b> is short for <b>[CT]</b></li>
+    <li>If you buy PCR primers and specify <b>Y</b> in the sequence, for that position 50% of the molecules will bind to a <b>C</b> and 50% to <b>T</b></li>
+  </ul>
+</div>
+
 
 
 
@@ -279,25 +280,125 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
 
 <div class="slide">
-  <h1>Bio::Regexp - IUPAC codes</h1>
-  <ul>
-    <li>Supports IUPAC abbreviations, which are the same idea as regexp character classes</li>
-    <li>Regexp character class: <b>\w</b> is short for <b>[a-zA-Z0-9_]</b></li>
-    <li>IUPAC abbreviation: <b>Y</b> is short for <b>[CT]</b></li>
-    <li>If you buy PCR primers and specify <b>Y</b> in the sequence, for that position 50% of the molecules will bind to a <b>C</b> and 50% to <b>T</b></li>
-  </ul>
+  <h1>Unicode Properties</h1>
+
+The greek alphabet doesn't round-trip through case conversions (final sigma form is lost):
+
+<pre style="margin-left: 100px">
+$ perl -CAS -E 'use utf8; say lc(uc("Θησέας"))'
+θησέασ
+</pre>
+
+But we can use a simple regexp to correct this:
+
+<pre style="margin-left: 100px">
+sub greekify { $_[0] =~ s/(?<=\p{Greek})σ\b/ς/gr }
+</pre>
+
+This puts back the final sigma form in greek text:
+
+<pre style="margin-left: 100px">
+greekify(lc(uc("Θησέας")))
+=> Θησέας
+</pre>
+
+Without breaking other uses of sigma:
+
+<pre style="margin-left: 100px">
+greekify(lc(uc("The sample is 5σ from the mean")))
+the sample is 5σ from the mean
+</pre>
+<div>
+
+
+
+<div class="slide">
+  <h1>Text::Unidecode</h1>
+
+Russian: Good-bye
+<pre style="margin-left: 100px">
+unidecode("До свидания")
+  => Do svidaniia
+</pre>
+
+Chinese: Shanghai (the city)
+<pre style="margin-left: 100px">
+unidecode("上海")
+  => Shang Hai
+</pre>
+
+Arabic: Good morning ("Sabah el kheer")
+<pre style="margin-left: 100px">
+unidecode("صباح الخير")
+  => SbH lkhyr 
+</pre>
+
+Thai: Tom Yum (the soup)
+<pre style="margin-left: 100px">
+unidecode("ต้มยำ")
+  => tmyam
+</pre>
 </div>
 
 
 
 <div class="slide">
-  <h1>Limitations of perl's engine</h1>
+  <h1>Bi-Directional Writing</h1>
   <ul>
-    <li>Although back-tracking can be very useful (as we've seen), certain patterns can take an exponentially long time to match/fail. You shouldn't use backtracking engines to process untrusted patterns otherwise malicious sequences could peg your CPU indefinitely</li>
-    <li>Some engines limit the language to prevent back-tracking and can process all patterns in linear time by compiling them to DFAs. For example, <b>re::engine::RE2</b></li>
-    <li>Perl's engine can't export and re-import its internal state so that data can be iteratively processed in blocks as it arrives</li>
-    <li><b>Ragel</b> and <b>sregex</b> are examples of state machine parsers that can do this</li>
+    <li>Perl's regexp engine (with Text::Bidi and Text::WrapI18N) supports bi-directional text as per unicode TR9</li>
+    <li>In pre-hellenistic greek, it was common to write in alternating directions: Boustrophedon ("as the ox turns")</li>
+  </ul>
+
+  <br>
+
+  <center><img src="img/boustrophedon.jpg"></center>
+</div>
+
+
+
+<div class="slide">
+  <h1>Text::Boustrophedon</h1>
+
+Most useless module ever 😁
+
+<br><br>
+
+<pre style="font-size: 80%">
+$ perl -CAS -MText::Boustrophedon \
+       -E 'undef $/; say Text::Boustrophedon::greek(<>)' \
+       < input.txt
+
+Achilles glared at him and answered, "Fool, prate not 
+       ƨƚnɒnɘvoɔ on ɘd nɒɔ ɘɿɘʜT .ƨƚnɒnɘvoɔ ƚuodɒ ɘm oƚ
+between lions and men, wolves and lambs can never be of
+     .ʜǫuoɿʜƚ bnɒ ʜǫuoɿʜƚ ɿɘʜƚo ʜɔɒɘ ɘƚɒʜ ƚud ,bnim ɘno
+Therefore there can be no understanding between you and
+ɘno lliƚ ,ƨu nɘɘwƚɘd ƨƚnɒnɘvoɔ ynɒ ɘd ɘɿɘʜƚ yɒm ɿon ,ɘm
+or other shall fall and glut grim Ares with his life's 
+                                                ."boold
+</pre>
+</div>
+
+
+
+
+<div class="slide">
+  <h1>Re-Entrant Regexp Engine</h1>
+
   <ul>
+    <li>Re-entrancy is when a function is invoked while already inside that function</li>
+    <li>Different than thread-safe (compare threads vs unix signals)</li>
+    <li>Before perl 5.14, the engine was not fully re-entrant:
+
+<pre>
+$ perl -e 'print "$]\n"'
+5.008009
+$ perl -e '"X" =~ m{(??{ "X" =~ m{} })}'
+Segmentation fault
+</pre>
+    </li>
+    <li>Running code from inside the regexp engine is useful (done in Regexp::Assemble and Regexp::Exhaustive) &mdash; even more useful when the code can be unrestricted perl that includes regexps</li>
+  </ul>
 </div>
 
 
@@ -311,14 +412,22 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 
   <br>
 
-  <h2>Learn more on CPAN:</h2>
-  <ul>
-    <li><a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Debugger</a></li>
-    <li><a href="https://metacpan.org/module/Regexp::Assemble">Regexp::Assemble</a></li>
-    <li><a href="https://metacpan.org/module/Regexp::Grammars">Regexp::Grammars</a></li>
-    <li><a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Exhaustive</a></li>
-    <li><a href="http://github.com/hoytech/Bio-Regexp/">Bio::Regexp</a> (CPAN soon, on my github now)</li>
-  </ul>
+  <h2>Modules:</h2>
+  <br>
+
+  <center>
+  <a href="https://metacpan.org/module/Regexp::Debugger">Regexp::Debugger</a> &mdash;
+  <a href="https://metacpan.org/module/Regexp::Assemble">Regexp::Assemble</a> &mdash;
+  <a href="https://metacpan.org/module/Regexp::Grammars">Regexp::Grammars</a>
+  <br>
+  <a href="https://metacpan.org/module/Regexp::Exhaustive">Regexp::Exhaustive</a> &mdash;
+  <a href="http://github.com/hoytech/Bio-Regexp/">Bio::Regexp</a> &mdash;
+  <a href="https://metacpan.org/module/Text::Unidecode">Text::Unidecode</a>
+  <br>
+  <a href="https://metacpan.org/module/Text::Boustrophedon">Text::Boustrophedon</a> &mdash;
+  <a href="https://metacpan.org/module/Text::WrapI18N">Text::Bidi</a> &mdash;
+  <a href="https://metacpan.org/module/Text::WrapI18N">Text::WrapI18N</a>
+  </center>
 </div>
 
 
