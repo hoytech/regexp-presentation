@@ -52,7 +52,7 @@
   <ul>
     <li>What is the regexp engine actually doing? Use <b>rxrx</b></li>
     <li>Which parts of the regexp and input data are most expensive?</li>
-    <li><i>Demo:</i> match <pre>/[ab]{5}bbb/</pre><br>Against <pre>'aaaaaaaaaaaaaaaaQQQQQQQQQaaaaaaaaaaaaaaaQQQQQQQQQQQQ'</pre><br> Press 'h' in the debugger to generate heat-maps</li>
+    <li><i>Demo:</i> match <pre>/[ab]{5}bbb/</pre><br>Against <pre style="font-size: 75%">'aaaaaaaaaaaaaaaaQQQQQQQQQaaaaaaaaaaaaaaaQQQQQQQQQQQQ'</pre><br> Press 'h' in the debugger to generate heat-maps</li>
   </ul>
 </div>
 
@@ -100,11 +100,11 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
     <li>Adds recursive descent parsing to perl's regexp engine</li>
     <li>Affects regexps defined lexically:
       <pre>
-        {
-          use Regexp::Grammars;
+  {
+    use Regexp::Grammars;
 
-          ## regexps here will support grammars
-        }
+    ## regexps here will support grammars
+  }
       </pre>
     </li>
   </ul>
