@@ -13,3 +13,12 @@ perl -CAS -Mblib -MText::Boustrophedon -E '$Text::Boustrophedon::columns = 55; u
 perl -MPerlIO::via::Unidecode -E 'open($fh, "<:encoding(utf8):via(Unidecode)", "inp") || die $!; print <$fh>'
 
 perl -CAS -MAnnotate -E 'use utf8; say Annotate::annotate_unidecode("Hello I am 许勤 from 深 圳")'
+
+
+
+use utf8;
+
+use Text::WrapI18N qw(wrap $columns);
+$columns = 10;
+
+print wrap("","","") . "\n";

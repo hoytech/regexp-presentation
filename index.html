@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
-<title>Re-Enter Regular Expressions</title>
+<title>Getting the most out of regular expressions</title>
 <!-- metadata -->
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <meta name="generator" content="S5" />
@@ -29,7 +29,7 @@
 <div id="currentSlide"><!-- DO NOT EDIT --></div>
 <div id="header"></div>
 <div id="footer">
-<h1>Re-Enter Regular Expressions</h1>
+<h1>Getting the most out of regular expressions</h1>
 </div>
 
 </div>
@@ -39,7 +39,7 @@
 
 <div class="slide">
   <center>
-  <h1 style="font-size: 300%">Re-Enter Regular Expressions</h1>
+  <h1 style="font-size: 300%">Getting the most out of regular expressions</h1>
   <br>
   <h2>Doug Hoyte</h2>
   </center>
@@ -86,7 +86,7 @@ TT(G(ATG|GAC)|CAA[CG])
     <li>Regexp::Assemble uses the <b>(?{ ... })</b> regexp directive:<pre>
 TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
     </pre></li>
-    <li>After a successful match the index of the matching sub-expression will be stored in <b>$^R</b> (aka <b>$LAST_REGEXP_CODE_RESULT</b>)
+    <li>When reached by a regexp directive, the code in braces will be evaluated and the result will be stored in <b>$^R</b> (aka <b>$LAST_REGEXP_CODE_RESULT</b>)
     <li>Although here we're just returning integers, this could be arbitrary perl code</li>
   </ul>
 </div>
@@ -96,6 +96,7 @@ TT(G(ATG(?{2})|GAC(?{3}))|CAA(C(?{0})|G(?{1})))
 <div class="slide">
   <h1>Regexp::Grammars</h1>
   <ul>
+    <li>Awesome Damian module (so is Regexp::Debugger)</li>
     <li>Adds recursive descent parsing to perl's regexp engine</li>
     <li>Affects regexps defined lexically:
       <pre>
@@ -302,20 +303,20 @@ unidecode("До свидания")
   => Do svidaniia
 </pre>
 
-Arabic: Good morning ("Sabah el kheer")
-<pre style="margin-left: 100px">
-unidecode("صباح الخير")
-  => SbH lkhyr 
-</pre>
-
 Thai: Tom Yum (the soup)
 <pre style="margin-left: 100px">
 unidecode("ต้มยำ")
   => tmyam
 </pre>
 
+Arabic: Good morning ("Sabah el kheer")
+<pre style="margin-left: 100px">
+unidecode("صباح الخير")
+  => SbH lkhyr 
+</pre>
+
 <br>
-With PerlIO::via::Unidecode can do <pre>open(my $fh, "<:encoding(utf8):via(Unidecode)", $file)</pre>
+With PerlIO::via::Unidecode can do <pre style="font-size: 70%">open(my $fh, "<:encoding(utf8):via(Unidecode)", $file)</pre>
 </div>
 
 
@@ -337,11 +338,12 @@ sub annotate_unidecode {
 </pre>
 
 <br>
-Quite useful for reading sparse mixed-script documents:
+Useful for form data (and mixed-script text):
 
 <pre style="font-size: 90%">
-annotate_unidecode("Hello I am 许勤 from 深圳")'
-  => Hello I am 许勤 (Xu Qin) from 深圳 (Shen Zhen)
+annotate_unidecode("Name: 许勤   City: 深圳")'
+
+  => Name: 许勤 (Xu Qin)   City: 深圳 (Shen Zhen)
 </pre>
 
 </div>
@@ -349,7 +351,7 @@ annotate_unidecode("Hello I am 许勤 from 深圳")'
 <div class="slide">
   <h1>Bi-Directional Writing</h1>
   <ul>
-    <li>Perl has good bi-directional language support (such as Text::Bidi and Text::WrapI18N)</li>
+    <li>Perl has bi-directional language support (such as Text::Bidi and Text::WrapI18N)</li>
     <li>In pre-hellenistic greek, it was common to write in alternating directions: Boustrophedon ("as the ox turns")</li>
   </ul>
 
@@ -387,6 +389,29 @@ or other shall fall and glut grim Ares with his life's
 
 
 
+<div class="slide">
+  <h1>Re-Entrant Regexp Engine</h1>
+
+  <ul>
+    <li>Re-entrancy is when a function is invoked while already inside that function</li>
+    <li>Different than thread-safe (compare threads vs unix signals)</li>
+    <li>Before perl 5.14, the engine was not fully re-entrant:
+
+<pre>
+$ perl -e 'print "$]\n"'
+5.008009
+$ perl -e '"X" =~ m{(??{ "X" =~ m{} })}'
+Segmentation fault
+</pre>
+    </li>
+    <li>Running code from inside the regexp engine is quite useful. It's used by many of the modules discussed: Regexp::Grammars, Regexp::Assemble, Regexp::Exhaustive, Bio::Regexp</li>
+    <li>Real perl code needs to use regexps</li>
+  </ul>
+</div>
+
+
+
+
 
 <div class="slide">
   <h1>The C curse</h1>
@@ -405,9 +430,9 @@ or other shall fall and glut grim Ares with his life's
   <h1>Virtual memory page permissions</h1>
 
   <ul>
-    <li>It is common to use perl strings to point to memory not managed by perl, for example with memory mapped files</li>
-    <li>However the OS can map the file anywhere in memory and the adjacent pages aren't guaranteed to be readable</li>
-    <li>If the file mapped is an exact multiple of VM page size, and your OS has chosen a random address for the mapping, and you run certain regexps against the string, then &#128163; segfault &#128163;</li>
+    <li>It is common to use perl strings to point to memory not managed by perl</li>
+    <li>For example with memory mapped files -- However the OS can map the file anywhere in memory and the adjacent pages aren't guaranteed to be readable</li>
+    <li>If the file mapped is an exact multiple of VM page size, and your OS has chosen a random address for the mapping, and you run certain regexps against the string, then segfault &#128163;</li>
   </ul>
 </div>
 
@@ -435,27 +460,6 @@ $string =~ /.$/; ## boom
 </div>
 
 
-
-
-<div class="slide">
-  <h1>Re-Entrant Regexp Engine</h1>
-
-  <ul>
-    <li>Re-entrancy is when a function is invoked while already inside that function</li>
-    <li>Different than thread-safe (compare threads vs unix signals)</li>
-    <li>Before perl 5.14, the engine was not fully re-entrant:
-
-<pre>
-$ perl -e 'print "$]\n"'
-5.008009
-$ perl -e '"X" =~ m{(??{ "X" =~ m{} })}'
-Segmentation fault
-</pre>
-    </li>
-    <li>As we've seen, running code from inside the regexp engine is quite useful: Regexp::Grammars, Regexp::Assemble, Regexp::Exhaustive, our annotate_unidecode sub</li>
-    <li>Real perl code needs to use regexps</li>
-  </ul>
-</div>
 
 
 
