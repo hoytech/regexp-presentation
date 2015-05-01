@@ -4,7 +4,11 @@
 
 regexp-presentation - Getting the most out of regular expressions
 
-=head1 VIEW
+=head1 VIDEO
+
+https://www.youtube.com/watch?v=01Mxib4KNTY
+
+=head1 SLIDES
 
 http://hoytech.github.io/regexp-presentation
 
